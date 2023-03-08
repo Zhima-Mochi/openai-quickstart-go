@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>OpenAI Quickstart</title>
+    <link rel="shortcut icon" href="/static/dog.png" />
+    <link rel="stylesheet" href="/static/main.css" />
+  </head>
+  <body>
+      <img src="/static/dog.png" class="icon" />
+    <h3>Name my pet</h3>
+    <form>
+      <input type="text" name="animal" placeholder="Enter an animal" />
+      <input type="submit" value="Generate names" onclick="onSubmit(event)" />
+    </form>
+    <div id="result"></div>
+    <script>
+      async function onSubmit(event) {
+        event.preventDefault();
+        const animalInput = document.querySelector("input[name=animal]").value;
+        const response = await fetch("/api/generate", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ prompt: animalInput }),
+        });
+        const data = await response.json();
+        if (response.status === 200) {
+          document.querySelector("#result").innerHTML = data.result;
+        } else {
+          console.error(data.error);
+        }
+      }
+    </script>
+  </body>
+</html>
