@@ -1,44 +1,42 @@
-# openai-quickstart-go
-## OpenAI API Quickstart - Golang example app  
-This is an example pet name generator app used in the OpenAI API [quickstart tutorial](https://platform.openai.com/docs/quickstart). It uses the [Go](https://go.dev/) framework with [Gin](https://github.com/gin-gonic/gin). Check out the tutorial or follow the instructions below to get set up.
+# OpenAI API quickstart (Go)
 
-![Text box that says name my pet with an icon of a dog](https://user-images.githubusercontent.com/10623307/213887080-b2bc4645-7fdb-4dbd-ae42-efce00d0dc29.png)
-
+Minimal pet superhero-name generator, intentionally implemented with the Go standard library only. This eliminates legacy third-party dependency vulnerabilities in the original example while keeping the GET `/` page and POST `/api/generate` response shape (`{"result":"..."}`).
 
 ## Setup
 
-1. install go (version >= 1.18)
+Requires Go 1.19+ and an OpenAI API key.
 
-2. Clone this repository
+Copy `.env.example` into your preferred local environment setup. The server reads environment variables directly; it does **not** automatically read a `.env` file.
 
-3. Navigate into the project directory
+On Linux/macOS:
 
-   ```bash
-   $ cd openai-quickstart-go
-   ```
+```sh
+export OPENAI_API_KEY="your-key"
+export OPENAI_MODEL="gpt-4.1-mini" # optional
+go test ./...
+go run .
+```
 
-4. Install the requirements
+On Windows PowerShell:
 
-   ```bash
-   $ go mod tidy
-   ```
+```powershell
+$env:OPENAI_API_KEY="your-key"
+$env:OPENAI_MODEL="gpt-4.1-mini"
+go test ./...
+go run .
+```
 
-5. Make a copy of the example environment variables file
+Open http://localhost:8080.
 
-   On Linux systems: 
-   ```bash
-   $ cp .env.example .env
-   ```
-   On Windows:
-   ```powershell
-   $ copy .env.example .env
-   ```
-6. Add your [API key](https://platform.openai.com/account/api-keys) to the newly created `.env` file
+## Security notes
 
-7. Run the app
+- No external Go modules. There is no `go.sum` because all imports are from the Go standard library.
+- HTTP requests are bounded by size and deadlines; upstream requests have timeouts.
+- The model is chosen by the server-side `OPENAI_MODEL` environment variable, not by the browser client, avoiding unauthenticated model-cost escalation.
+- Model output is inserted into the page with `textContent` to avoid HTML/script injection.
+- The old `text-davinci-003` completions model was replaced with the Chat Completions API using `gpt-4.1-mini` by default. API output style can change accordingly.
+- This is a demo, not a hardened public deployment. Add authentication and rate limits before exposing it to the internet.
 
-   ```bash
-   $ go run main.go
-   ```
+## API
 
-You should now be able to access the app at [http://localhost:8080](http://localhost:8080)! For the full context behind this example app, check out the [tutorial](https://platform.openai.com/docs/quickstart).
+POST `/api/generate` with JSON body `{"prompt":"Dog"}`. Responds `{"result":"..."}` on success. Optional `temperature` remains supported between 0 and 2. The legacy `model` and `max_tokens` client fields are accepted but ignored to prevent untrusted cost escalation.
