@@ -7,29 +7,30 @@
     <link rel="stylesheet" href="/static/main.css" />
   </head>
   <body>
-      <img src="/static/dog.png" class="icon" />
+    <img src="/static/dog.png" class="icon" alt="Dog" />
     <h3>Name my pet</h3>
     <form>
-      <input type="text" name="animal" placeholder="Enter an animal" />
+      <input type="text" name="animal" placeholder="Enter an animal" maxlength="200" required />
       <input type="submit" value="Generate names" onclick="onSubmit(event)" />
     </form>
-    <div id="result"></div>
+    <div id="result" aria-live="polite"></div>
     <script>
       async function onSubmit(event) {
         event.preventDefault();
+        const result = document.querySelector("#result");
         const animalInput = document.querySelector("input[name=animal]").value;
-        const response = await fetch("/api/generate", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ prompt: animalInput }),
-        });
-        const data = await response.json();
-        if (response.status === 200) {
-          document.querySelector("#result").innerHTML = data.result;
-        } else {
-          console.error(data.error);
+        result.textContent = "Generating...";
+        try {
+          const response = await fetch("/api/generate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ prompt: animalInput }),
+          });
+          const data = await response.json();
+          // Treat generated model output as text, never executable HTML.
+          result.textContent = response.ok ? data.result : (data.error || "Generation failed");
+        } catch (_) {
+          result.textContent = "Generation unavailable";
         }
       }
     </script>
